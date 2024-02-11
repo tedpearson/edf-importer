@@ -1,0 +1,4 @@
+host: https://localhost:8086
+auth_token: token
+org: ""
+bucket: database
