@@ -134,6 +134,10 @@ func parseAnnotations(annotations string, samplingStart time.Time, lastData time
 		//       and the duration refers to how many seconds earlier the event started.
 		//       I am not sure that's the actual definition of these fields in the EDF+ spec.
 		endTime := samplingStart.Add(time.Millisecond * time.Duration(onset*1_000))
+		if duration == 0 {
+			// some events have no duration. defaulting them to 10s.
+			duration = 10
+		}
 		onsetTime := endTime.Add(-time.Millisecond * time.Duration(duration*1_000))
 		if endTime.After(lastData) {
 			as.Events = append(as.Events, Event{
