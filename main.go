@@ -21,6 +21,7 @@ func main() {
 	path := flag.String("path", "/Volumes/NO NAME/DATALOG", "Path to data directory")
 	configFile := flag.String("config", "sdf-importer.yaml", "Config file")
 	stateFile := flag.String("state-file", "edf-importer.state.yaml", "State file")
+	dryRun := flag.Bool("dry-run", false, "Don't insert into the database")
 	versionFlag := flag.Bool("v", false, "Show version and exit")
 	flag.Parse()
 	fmt.Printf("edf-importer version %s built on %s with %s\n", version, buildDate, goVersion)
@@ -49,10 +50,14 @@ func main() {
 			fmt.Printf("Error parsing %s: %s\n", file, err)
 			continue
 		}
-		influxWriter.WriteData(annotations, metrics)
+		if !*dryRun {
+			influxWriter.WriteData(annotations, metrics)
+		}
 	}
 	state.LastData = newLastData
-	writeState(state, *stateFile)
+	if !*dryRun {
+		writeState(state, *stateFile)
+	}
 	influxWriter.Close()
 }
 
