@@ -12,6 +12,8 @@ to allow this. For Victoriametrics, for example, make sure the flag `-dedup.minS
 set to a low value, in my case less than 40ms.
 - The data is read with your computer's local timezone, as EDF files do not necessarily have a timezone
 associated with their data.
+- Zero-duration events from EDF+ annotations are automatically given a 10 second duration.
+This was done to allow easier graphing of ResMed Hypopnea events.
 
 ## Running
 TBD
