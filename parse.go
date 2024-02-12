@@ -130,8 +130,11 @@ func parseAnnotations(annotations string, samplingStart time.Time, lastData time
 			}
 			out[name] = as
 		}
-		onsetTime := samplingStart.Add(time.Millisecond * time.Duration(onset*1_000))
-		endTime := onsetTime.Add(time.Millisecond * time.Duration(duration*1_000))
+		// note: at least on a ResMed device, "onset" apparently refers to the end of the event,
+		//       and the duration refers to how many seconds earlier the event started.
+		//       I am not sure that's the actual definition of these fields in the EDF+ spec.
+		endTime := samplingStart.Add(time.Millisecond * time.Duration(onset*1_000))
+		onsetTime := endTime.Add(-time.Millisecond * time.Duration(duration*1_000))
 		if endTime.After(lastData) {
 			as.Events = append(as.Events, Event{
 				Start: onsetTime,
