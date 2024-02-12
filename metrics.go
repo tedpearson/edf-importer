@@ -50,12 +50,8 @@ func (i InfluxWriter) writeAnnotations(annotations map[string]*Annotation) {
 				SetTime(event.Start))
 			i.api.WritePoint(influxdb2.NewPointWithMeasurement("cpap").
 				AddTag("event", annotation.Name).
-				AddField("annotation", 1).
-				SetTime(event.End))
-			i.api.WritePoint(influxdb2.NewPointWithMeasurement("cpap").
-				AddTag("event", annotation.Name).
 				AddField("annotation", 0).
-				SetTime(event.End.Add(time.Second)))
+				SetTime(event.End))
 		}
 	}
 }
