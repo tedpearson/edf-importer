@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/influxdata/influxdb-client-go/v2 v2.13.0
-	github.com/ishiikurisu/edf v1.0.1-0.20210127125851-80fff761e798
+	github.com/ishiikurisu/edf v1.0.1-0.20240213131117-17012efe2c5d
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -15,5 +15,3 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1 // indirect
 	golang.org/x/net v0.21.0 // indirect
 )
-
-replace github.com/ishiikurisu/edf => github.com/tedpearson/edf v0.0.0-20240210051734-e040e9508b51
