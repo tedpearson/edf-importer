@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/ishiikurisu/edf"
 )
 
@@ -31,7 +32,7 @@ type Event struct {
 	End   time.Time
 }
 
-func parseFile(file string, lastData time.Time) (metrics []Metric, annotations map[string]*Annotation, e error) {
+func parseFile(file string, lastData time.Time) (metrics []Metric, annotations map[string]*Annotation, lastPointTime time.Time, e error) {
 	fmt.Printf("Parsing %s\n", file)
 	data := edf.ReadFile(file)
 	samplingStart, err := time.ParseInLocation("02.01.06 15.04.05", data.Header["startdate"]+" "+data.Header["starttime"], time.Local)
@@ -43,16 +44,18 @@ func parseFile(file string, lastData time.Time) (metrics []Metric, annotations m
 	if annotationText != "" {
 		annotations = parseAnnotations(annotationText, samplingStart, lastData)
 	}
-	metrics = parseMetrics(data, samplingStart, lastData)
-	if err != nil {
-		e = err
-		return
+	sampleRate := time.Millisecond * time.Duration(int(data.GetDuration()*1000)/data.GetSampling())
+	lastPointTime = samplingStart.Add(sampleRate * time.Duration(len(data.PhysicalRecords[0])))
+	if lastPointTime.After(lastData) {
+		metrics = parseMetrics(data, samplingStart, sampleRate)
 	}
-	if len(metrics) > 0 {
-		fmt.Printf("Found %d points in %d metrics\n", sumMetrics(metrics), len(metrics))
+	metricSum := sumMetrics(metrics)
+	if metricSum > 0 {
+		fmt.Printf("Found %s new points in %d metrics\n", humanize.Comma(int64(metricSum)), len(metrics))
 	}
-	if len(annotations) > 0 {
-		fmt.Printf("Found %d events in %d annotations\n", sumAnnotations(annotations), len(annotations))
+	annotationSum := sumAnnotations(annotations)
+	if annotationSum > 0 {
+		fmt.Printf("Found %s new events in %d annotations\n", humanize.Comma(int64(annotationSum)), len(annotations))
 	}
 	return
 }
@@ -73,13 +76,8 @@ func sumAnnotations(annotations map[string]*Annotation) (sum int) {
 
 var annotationRE = regexp.MustCompile(`^\+([\d.]+)\s([\d.]+)\s(.+)\s+`)
 
-func parseMetrics(data edf.Edf, samplingStart time.Time, lastData time.Time) []Metric {
+func parseMetrics(data edf.Edf, samplingStart time.Time, sampleRate time.Duration) []Metric {
 	metrics := make([]Metric, 0, 10)
-	sampleRate := time.Millisecond * time.Duration(int(data.GetDuration()*1000)/data.GetSampling())
-	lastPointTime := samplingStart.Add(sampleRate * time.Duration(len(data.PhysicalRecords[0])))
-	if lastPointTime.Before(lastData) {
-		return metrics
-	}
 	for i, series := range data.PhysicalRecords {
 		name := strings.ReplaceAll(strings.TrimSpace(data.GetLabels()[i]), ".", "_")
 		if name == "EDF Annotations" || name == "Crc16" {

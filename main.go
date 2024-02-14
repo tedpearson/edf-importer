@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"gopkg.in/yaml.v3"
 )
 
@@ -37,18 +38,26 @@ func main() {
 		panic(err)
 	}
 	newLastData := state.LastData
+	metricCount := 0
+	annotationCount := 0
+	metricFileCount := 0
+	annotationFileCount := 0
 	for _, file := range files {
-		metrics, annotations, err := parseFile(file, state.LastData)
-		if len(metrics) > 0 && len(metrics[0].Data) > 0 {
-			lastData := metrics[0].Data[len(metrics[0].Data)-1].Time
-			if lastData.After(newLastData) {
-				// update state if needed
-				newLastData = lastData
-			}
-		}
+		metrics, annotations, lastData, err := parseFile(file, state.LastData)
 		if err != nil {
 			fmt.Printf("Error parsing %s: %s\n", file, err)
 			continue
+		}
+		metricCount += sumMetrics(metrics)
+		annotationCount += sumAnnotations(annotations)
+		if metricCount > 0 {
+			metricFileCount++
+		}
+		if annotationCount > 0 {
+			annotationFileCount++
+		}
+		if lastData.After(newLastData) {
+			newLastData = lastData
 		}
 		if !*dryRun {
 			influxWriter.WriteData(annotations, metrics)
@@ -58,6 +67,9 @@ func main() {
 	if !*dryRun {
 		writeState(state, *stateFile)
 	}
+	fmt.Printf("\nTotal new data found: %s metric points in %s files, and %s annotation points in %s files.\n",
+		humanize.Comma(int64(metricCount)), humanize.Comma(int64(metricFileCount)),
+		humanize.Comma(int64(annotationCount)), humanize.Comma(int64(annotationFileCount)))
 	influxWriter.Close()
 }
 
@@ -109,7 +121,7 @@ func writeState(state State, file string) {
 	}
 	_, err = f.Write(bytes)
 	if err != nil {
-		fmt.Printf("failed to write state to: %s", file)
+		fmt.Printf("failed to write state to: %s\n", file)
 	}
 }
 
