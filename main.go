@@ -1,12 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
-	"regexp"
-	"time"
+	"os/signal"
+	"syscall"
 
 	"github.com/dustin/go-humanize"
 	"gopkg.in/yaml.v3"
@@ -33,7 +33,24 @@ func main() {
 	influxConfig := readConfig(*configFile)
 	influxWriter := NewInfluxWriter(influxConfig)
 	state := readState(*stateFile)
-	files, err := findFiles(*path, state.LastData)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go handleSignals(cancel)
+
+	if *dryRun {
+		fmt.Println("Dry run - no data will be inserted into the database.")
+		importData(*path, &state, true, *stateFile, influxWriter, ctx)
+		fmt.Println("Dry run - no data was inserted into the database.")
+	} else {
+		RunWhenMediaInserted(*path, ctx, func() {
+			importData(*path, &state, false, *stateFile, influxWriter, ctx)
+		})
+	}
+	influxWriter.Close()
+}
+
+func importData(path string, state *State, dryRun bool, stateFile string, influxWriter InfluxWriter, ctx context.Context) {
+	files, err := findFiles(path, state.LastData)
 	if err != nil {
 		panic(err)
 	}
@@ -43,6 +60,12 @@ func main() {
 	metricFileCount := 0
 	annotationFileCount := 0
 	for _, file := range files {
+		select {
+		case <-ctx.Done():
+			fmt.Println("Stop requested, not parsing any more files")
+		default:
+			// continue running
+		}
 		metrics, annotations, lastData, err := parseFile(file, state.LastData)
 		if err != nil {
 			fmt.Printf("Error parsing %s: %s\n", file, err)
@@ -59,18 +82,17 @@ func main() {
 		if lastData.After(newLastData) {
 			newLastData = lastData
 		}
-		if !*dryRun {
+		if !dryRun {
 			influxWriter.WriteData(annotations, metrics)
 		}
 	}
 	state.LastData = newLastData
-	if !*dryRun {
-		writeState(state, *stateFile)
+	if !dryRun {
+		writeState(*state, stateFile)
 	}
 	fmt.Printf("\nTotal new data found: %s metric points in %s files, and %s annotation points in %s files.\n",
 		humanize.Comma(int64(metricCount)), humanize.Comma(int64(metricFileCount)),
 		humanize.Comma(int64(annotationCount)), humanize.Comma(int64(annotationFileCount)))
-	influxWriter.Close()
 }
 
 func readConfig(configFile string) InfluxConfig {
@@ -86,67 +108,10 @@ func readConfig(configFile string) InfluxConfig {
 	return config
 }
 
-type State struct {
-	LastData time.Time
-}
-
-func readState(file string) State {
-	def := func() State {
-		return State{
-			LastData: time.UnixMilli(0),
-		}
-	}
-	f, err := os.ReadFile(file)
-	if err != nil {
-		return def()
-	}
-	var state State
-	err = yaml.Unmarshal(f, &state)
-	if err != nil {
-		return def()
-	}
-	return state
-}
-
-func writeState(state State, file string) {
-	f, err := os.Create(file)
-	if err != nil {
-		fmt.Printf("failed to open state file for writing: %s\n", file)
-		return
-	}
-	bytes, err := yaml.Marshal(state)
-	if err != nil {
-		fmt.Println("failed to marshal data")
-		return
-	}
-	_, err = f.Write(bytes)
-	if err != nil {
-		fmt.Printf("failed to write state to: %s\n", file)
-	}
-}
-
-func findFiles(dir string, lastUpdated time.Time) ([]string, error) {
-	// get dirs
-	dateDirs, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-	filteredFiles := make([]string, 0, 100)
-	// BRP: flow/pressure
-	// PLD: mask/press/leak/rep/tid/snbore/flowlim/etc
-	// EVE: annotations
-	regex := regexp.MustCompile(`^[^.].+(BRP|PLD|EVE).edf$`)
-	for _, dateDir := range dateDirs {
-		date, err := time.ParseInLocation("20060102", dateDir.Name(), time.Local)
-		if err != nil || date.Before(lastUpdated.Add(-time.Hour*48)) || !dateDir.IsDir() {
-			continue
-		}
-		files, err := os.ReadDir(filepath.Join(dir, dateDir.Name()))
-		for _, file := range files {
-			if regex.MatchString(file.Name()) {
-				filteredFiles = append(filteredFiles, filepath.Join(dir, dateDir.Name(), file.Name()))
-			}
-		}
-	}
-	return filteredFiles, nil
+func handleSignals(cancel context.CancelFunc) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	_ = <-c
+	fmt.Println("Shutdown requested...")
+	cancel()
 }
