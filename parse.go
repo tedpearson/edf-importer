@@ -49,9 +49,11 @@ func parseFile(file string, lastData time.Time) (metrics []Metric, annotations m
 	if lastPointTime.After(lastData) {
 		metrics = parseMetrics(data, samplingStart, sampleRate)
 	}
+	duration := lastPointTime.Sub(samplingStart)
 	metricSum := sumMetrics(metrics)
 	if metricSum > 0 {
-		fmt.Printf("Found %s new points in %d metrics\n", humanize.Comma(int64(metricSum)), len(metrics))
+		fmt.Printf("Found %s new points in %d metrics spanning %s (%s - %s)\n",
+			humanize.Comma(int64(metricSum)), len(metrics), duration, samplingStart.Format(time.DateTime), lastPointTime.Format(time.DateTime))
 	}
 	annotationSum := sumAnnotations(annotations)
 	if annotationSum > 0 {
