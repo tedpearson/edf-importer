@@ -16,12 +16,41 @@ associated with their data.
 This was done to allow easier graphing of ResMed Hypopnea events.
 
 ## Running
-TBD
+
+Rename `sdf-importer.example.ymal` to `sdf-importer.yaml` and fill in your database config.
+
+Sdf-importer will continue to run and watch the specified path, importing new data the next time
+you insert your SD card.
+
+    ./edf-importer --config sdf-importer.yaml --path /Volumes/<drivename>/folder    
+
+    Usage of ./edf-importer:
+      -config string
+        	Config file (default "sdf-importer.yaml")
+      -dry-run
+        	Don't insert into the database
+      -path string
+        	Path to data directory (default "/Volumes/NO NAME/DATALOG")
+      -state-file string
+        	State file (default "edf-importer.state.yaml")
+      -v	Show version and exit
 
 ## Details
-TBD
-- metric names and labels
-- annotation points
+
+Info about exported data:
+
+Metric name: **cpap**
+- fields:
+  - "edf supplied name"
+    - name will be whatever the EDF label name is from the EDF file.
+    - contains the raw data from the EDF file
+  - annotation
+    - value of 1 during the event
+    - value of 0 before and after the event
+- tags
+  - event
+    - contains the EDF+ annotation name
+    - only on annotation events, not raw data
 
 ## Dashboard
 TBD
