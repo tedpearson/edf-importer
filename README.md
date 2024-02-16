@@ -35,6 +35,18 @@ you insert your SD card.
         	State file (default "edf-importer.state.yaml")
       -v	Show version and exit
 
+## Running as a macOS LaunchAgent
+
+- Create a directory for edf-importer to live in. I chose `/Users/me/Documents/edf-importer`.
+- Copy to the directory:
+  - The `edf-importer` binary
+  - Download `edf-importer.example.yaml`, rename to `edf-importer.yaml` and fill in your values
+  - Download `com.github.tedpearson.edf-importer.plist.example`, rename to 
+  `com.github.tedpearson.edf-importer.plist`, and modify the paths to point to the directory
+  you chose above, and change the `--path` argument to point to your SD card volume.
+  - Move `com.github.tedpearson.edf-importer.plist` to `~/Library/LaunchAgents`
+  - Start edf-importer with `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.github.tedpearson.edf-importer.plist`
+
 ## Details
 
 Info about exported data:

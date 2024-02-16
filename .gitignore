@@ -24,3 +24,4 @@ go.work
 edf-importer.state.yaml
 edf-importer.yaml
 edf-importer
+com.github.tedpearson.edf-importer.plist

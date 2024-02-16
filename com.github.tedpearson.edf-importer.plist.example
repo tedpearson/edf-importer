@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>com.github.tedpearson.edf-importer</string>
+        <key>LimitLoadToSessionType</key>
+        <string>Aqua</string>
+        <key>ProgramArguments</key>
+        <array>
+            <string>/Users/you/Documents/edf-importer/edf-importer</string>
+            <string>--path</string>
+            <string>/Volumes/NO NAME/DATALOG</string>
+            <string>--config</string>
+            <string>/Users/you/Documents/edf-importer/edf-importer.yaml</string>
+            <string>--state-file</string>
+            <string>/Users/you/Documents/edf-importer/edf-importer.state.yaml</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>StandardOutPath</key>
+        <string>/Users/you/Documents/edf-importer/stdout.log</string>
+        <key>StandardErrorPath</key>
+        <string>/Users/you/Documents/edf-importer/stderr.log</string>
+    </dict>
+</plist>
