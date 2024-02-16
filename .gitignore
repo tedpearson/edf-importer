@@ -22,5 +22,5 @@ go.work
 
 .idea
 edf-importer.state.yaml
-sdf-importer.yaml
+edf-importer.yaml
 edf-importer

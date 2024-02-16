@@ -20,7 +20,7 @@ var (
 
 func main() {
 	path := flag.String("path", "/Volumes/NO NAME/DATALOG", "Path to data directory")
-	configFile := flag.String("config", "sdf-importer.yaml", "Config file")
+	configFile := flag.String("config", "edf-importer.yaml", "Config file")
 	stateFile := flag.String("state-file", "edf-importer.state.yaml", "State file")
 	dryRun := flag.Bool("dry-run", false, "Don't insert into the database")
 	versionFlag := flag.Bool("v", false, "Show version and exit")

@@ -17,16 +17,16 @@ This was done to allow easier graphing of ResMed Hypopnea events.
 
 ## Running
 
-Rename `sdf-importer.example.ymal` to `sdf-importer.yaml` and fill in your database config.
+Copy `edf-importer.example.yaml` to `edf-importer.yaml` and fill in your database config.
 
-Sdf-importer will continue to run and watch the specified path, importing new data the next time
+Edf-importer will continue to run and watch the specified path, importing new data the next time
 you insert your SD card.
 
-    ./edf-importer --config sdf-importer.yaml --path /Volumes/<drivename>/folder    
+    ./edf-importer --config edf-importer.yaml --path /Volumes/<drivename>/folder    
 
     Usage of ./edf-importer:
       -config string
-        	Config file (default "sdf-importer.yaml")
+        	Config file (default "edf-importer.yaml")
       -dry-run
         	Don't insert into the database
       -path string
