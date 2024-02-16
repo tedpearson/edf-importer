@@ -101,7 +101,7 @@ func RunWhenMediaInserted(file string, ctx context.Context, f func()) {
 		}
 		select {
 		case <-ctx.Done():
-			fmt.Printf("Stopping watching path: %s", file)
+			fmt.Printf("Stopping watching path: %s\n", file)
 			return
 		case <-time.After(time.Second * 5):
 			// continue to watch
