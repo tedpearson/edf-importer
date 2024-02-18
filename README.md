@@ -65,4 +65,31 @@ Metric name: **cpap**
     - only on annotation events, not raw data
 
 ## Dashboard
-TBD
+
+I have included my [Grafana dashboard definition](dashboard/dashboard.json) in the repo.
+I based it heavily on the graphs in OSCAR (see [Other Resources](#other-resources)).
+
+Here are a couple screenshots of the dashboards, one of an entire night, and one zoomed
+in so you can really see the details of the annotations and individual breaths.
+
+Features:
+- Has annotation/events, large leak, and flow limit color block display, which are toggleable
+- Has graphs of Flow Rate, Pressure, AHI, Snore Index, Flow Limit index, Leak Rate,
+  Respiration Rate, Minute Ventilation, and Tidal Volume.
+
+### Dashboard - Full Night
+![Dashboard](dashboard/dashboard.png)
+
+### Dashboard - Zoomed
+![Zoomed Dashboard](dashboard/dashboard-zoomed.png)
+
+## Other Resources
+
+Edf-importer was heavily influence by and my dashboards were inspired by
+[OSCAR, the Open Source CPAP Analysis Reporter](https://www.sleepfiles.com/OSCAR/).
+OSCAR allows you to import and view all the same data, see overviews and summary reports,
+and also has some additional calculated metrics including inpiration time, expiration time, and
+time at pressure. I will note that its AHI graph resets every time there is a data gap (when
+you take off the mask), so my dashboard is more accurate in this one case.
+
+For many people, OSCAR is probably all you need. For the nerds, this project is for you.
