@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     uses: tedpearson/ForecastMetrics/.github/workflows/release-template.yaml@master
