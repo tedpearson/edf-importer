@@ -69,6 +69,9 @@ Metric name: **cpap**
 I have included my [Grafana dashboard definition](dashboard/dashboard.json) in the repo.
 I based it heavily on the graphs in OSCAR (see [Other Resources](#other-resources)).
 
+Note that the dashboard as exported uses a VictoriaMetrics (Prometheus-like) datasource,
+not an InfluxDB datasource.
+
 Features:
 - Annotation/Events, large leak, and flow limit color block display, which are toggleable
 - Graphs of Flow Rate, Pressure, AHI, Snore Index, Flow Limit index, Leak Rate,
