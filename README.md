@@ -69,16 +69,24 @@ Metric name: **cpap**
 I have included my [Grafana dashboard definition](dashboard/dashboard.json) in the repo.
 I based it heavily on the graphs in OSCAR (see [Other Resources](#other-resources)).
 
-Here are a couple screenshots of the dashboards, one of an entire night, and one zoomed
-in so you can really see the details of the annotations and individual breaths.
-
 Features:
-- Has annotation/events, large leak, and flow limit color block display, which are toggleable
-- Has graphs of Flow Rate, Pressure, AHI, Snore Index, Flow Limit index, Leak Rate,
+- Annotation/Events, large leak, and flow limit color block display, which are toggleable
+- Graphs of Flow Rate, Pressure, AHI, Snore Index, Flow Limit index, Leak Rate,
   Respiration Rate, Minute Ventilation, and Tidal Volume.
+- Last Night singlestat view. Reports midnight-midnight values only. Only valid when the end of your time range
+  falls during an awake period.
+- AHI/Event daily bar charts. Report midnight-midnight values only.
+
+Here are a few screenshots of the dashboards:
+- A week, currently the default view, showing off AHI/Events per day views
+- An entire night
+- A zoomed in view so you can really see the details of the annotations and individual breaths.
+
+### Dashboard - Week
+![Weekly Dashboard](dashboard/dashboard-week.png)
 
 ### Dashboard - Full Night
-![Dashboard](dashboard/dashboard.png)
+![Nightly Dashboard](dashboard/dashboard-night.png)
 
 ### Dashboard - Zoomed
 ![Zoomed Dashboard](dashboard/dashboard-zoomed.png)
