@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,7 +25,7 @@ func main() {
 	dryRun := flag.Bool("dry-run", false, "Don't insert into the database")
 	versionFlag := flag.Bool("v", false, "Show version and exit")
 	flag.Parse()
-	fmt.Printf("edf-importer version %s built on %s with %s\n", version, buildDate, goVersion)
+	log.Printf("edf-importer version %s built on %s with %s\n", version, buildDate, goVersion)
 	if *versionFlag {
 		os.Exit(0)
 	}
@@ -38,9 +38,9 @@ func main() {
 	go handleSignals(cancel)
 
 	if *dryRun {
-		fmt.Println("Dry run - no data will be inserted into the database.")
+		log.Println("Dry run - no data will be inserted into the database.")
 		importData(*path, &state, true, *stateFile, influxWriter, ctx)
-		fmt.Println("Dry run - no data was inserted into the database.")
+		log.Println("Dry run - no data was inserted into the database.")
 	} else {
 		RunWhenMediaInserted(*path, ctx, func() {
 			importData(*path, &state, false, *stateFile, influxWriter, ctx)
@@ -62,13 +62,13 @@ func importData(path string, state *State, dryRun bool, stateFile string, influx
 	for _, file := range files {
 		select {
 		case <-ctx.Done():
-			fmt.Println("Stop requested, not parsing any more files")
+			log.Println("Stop requested, not parsing any more files")
 		default:
 			// continue running
 		}
 		metrics, annotations, lastData, err := parseFile(file, state.LastData)
 		if err != nil {
-			fmt.Printf("Error parsing %s: %s\n", file, err)
+			log.Printf("Error parsing %s: %s\n", file, err)
 			continue
 		}
 		metricCount += sumMetrics(metrics)
@@ -90,7 +90,7 @@ func importData(path string, state *State, dryRun bool, stateFile string, influx
 	if !dryRun {
 		writeState(*state, stateFile)
 	}
-	fmt.Printf("\nTotal new data found: %s metric points in %s files, and %s annotation points in %s files.\n",
+	log.Printf("\nTotal new data found: %s metric points in %s files, and %s annotation points in %s files.\n",
 		humanize.Comma(int64(metricCount)), humanize.Comma(int64(metricFileCount)),
 		humanize.Comma(int64(annotationCount)), humanize.Comma(int64(annotationFileCount)))
 }
@@ -98,12 +98,12 @@ func importData(path string, state *State, dryRun bool, stateFile string, influx
 func readConfig(configFile string) InfluxConfig {
 	cf, err := os.ReadFile(configFile)
 	if err != nil {
-		panic(fmt.Sprintf("Error reading config file %s: %s", configFile, err))
+		log.Fatalf("Error reading config file %s: %s", configFile, err)
 	}
 	var config InfluxConfig
 	err = yaml.Unmarshal(cf, &config)
 	if err != nil {
-		panic(fmt.Sprintf("Error loading config from %s: %s", configFile, err))
+		log.Fatalf("Error loading config from %s: %s", configFile, err)
 	}
 	return config
 }
@@ -112,6 +112,6 @@ func handleSignals(cancel context.CancelFunc) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	_ = <-c
-	fmt.Println("Shutdown requested...")
+	log.Println("Shutdown requested...")
 	cancel()
 }

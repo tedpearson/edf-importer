@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"math"
 	"regexp"
 	"strconv"
@@ -33,7 +33,7 @@ type Event struct {
 }
 
 func parseFile(file string, lastData time.Time) (metrics []Metric, annotations map[string]*Annotation, lastPointTime time.Time, e error) {
-	fmt.Printf("Parsing %s\n", file)
+	log.Printf("Parsing %s\n", file)
 	data := edf.ReadFile(file)
 	samplingStart, err := time.ParseInLocation("02.01.06 15.04.05", data.Header["startdate"]+" "+data.Header["starttime"], time.Local)
 	if err != nil {
@@ -52,12 +52,12 @@ func parseFile(file string, lastData time.Time) (metrics []Metric, annotations m
 	duration := lastPointTime.Sub(samplingStart)
 	metricSum := sumMetrics(metrics)
 	if metricSum > 0 {
-		fmt.Printf("Found %s new points in %d metrics spanning %s (%s - %s)\n",
+		log.Printf("Found %s new points in %d metrics spanning %s (%s - %s)\n",
 			humanize.Comma(int64(metricSum)), len(metrics), duration, samplingStart.Format(time.DateTime), lastPointTime.Format(time.DateTime))
 	}
 	annotationSum := sumAnnotations(annotations)
 	if annotationSum > 0 {
-		fmt.Printf("Found %s new events in %d annotations\n", humanize.Comma(int64(annotationSum)), len(annotations))
+		log.Printf("Found %s new events in %d annotations\n", humanize.Comma(int64(annotationSum)), len(annotations))
 	}
 	return
 }

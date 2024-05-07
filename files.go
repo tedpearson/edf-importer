@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -36,17 +36,17 @@ func readState(file string) State {
 func writeState(state State, file string) {
 	f, err := os.Create(file)
 	if err != nil {
-		fmt.Printf("failed to open state file for writing: %s\n", file)
+		log.Printf("failed to open state file for writing: %s\n", file)
 		return
 	}
 	bytes, err := yaml.Marshal(state)
 	if err != nil {
-		fmt.Println("failed to marshal data")
+		log.Println("failed to marshal data")
 		return
 	}
 	_, err = f.Write(bytes)
 	if err != nil {
-		fmt.Printf("failed to write state to: %s\n", file)
+		log.Printf("failed to write state to: %s\n", file)
 	}
 }
 
@@ -84,24 +84,24 @@ func findFiles(dir string, lastUpdated time.Time) ([]string, error) {
 // f will be called each time.
 func RunWhenMediaInserted(file string, ctx context.Context, f func()) {
 	fsFound := false
-	fmt.Printf("Watching media path: %s\n", file)
+	log.Printf("Watching media path: %s\n", file)
 	for {
 		fileInfo, err := os.Stat(file)
 		if fsFound {
 			if err != nil {
 				fsFound = false
-				fmt.Printf("Media removed: %s\n", file)
+				log.Printf("Media removed: %s\n", file)
 			}
 		} else {
 			if err == nil && fileInfo.IsDir() {
 				fsFound = true
-				fmt.Printf("Media inserted: %s\n", file)
+				log.Printf("Media inserted: %s\n", file)
 				f()
 			}
 		}
 		select {
 		case <-ctx.Done():
-			fmt.Printf("Stopping watching path: %s\n", file)
+			log.Printf("Stopping watching path: %s\n", file)
 			return
 		case <-time.After(time.Second * 5):
 			// continue to watch
