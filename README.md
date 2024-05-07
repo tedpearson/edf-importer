@@ -46,6 +46,7 @@ you insert your SD card.
   you chose above, and change the `--path` argument to point to your SD card volume.
   - Move `com.github.tedpearson.edf-importer.plist` to `~/Library/LaunchAgents`
   - Start edf-importer with `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.github.tedpearson.edf-importer.plist`
+  - Stop edf-importer with `launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.github.tedpearson.edf-importer.plist`
 
 ## Details
 
