@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"math"
 	"regexp"
@@ -35,6 +37,10 @@ type Event struct {
 func parseFile(file string, lastData time.Time) (metrics []Metric, annotations map[string]*Annotation, lastPointTime time.Time, e error) {
 	log.Printf("Parsing %s\n", file)
 	data := edf.ReadFile(file)
+	if data.GetSampling() == 0 {
+		e = errors.New(fmt.Sprintf("malformed file, not parsing: %s", file))
+		return
+	}
 	samplingStart, err := time.ParseInLocation("02.01.06 15.04.05", data.Header["startdate"]+" "+data.Header["starttime"], time.Local)
 	if err != nil {
 		e = err
