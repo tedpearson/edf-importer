@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/dustin/go-humanize v1.0.1
-	github.com/influxdata/influxdb-client-go/v2 v2.13.0
+	github.com/influxdata/influxdb-client-go/v2 v2.14.0
 	github.com/ishiikurisu/edf v1.0.1-0.20240213131117-17012efe2c5d
 	gopkg.in/yaml.v3 v3.0.1
 )
